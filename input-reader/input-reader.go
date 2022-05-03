@@ -2,20 +2,20 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	evdev "github.com/gvalkov/golang-evdev"
+	mqttclient "github.com/pmoscode/golang-mqtt"
 	"log"
 	"strings"
 )
 
-func setupCommandLine() (*string, *string, *string) {
-	interfaceParam := flag.String("interface", "", "Input interface (id) to liste on")
+func setupCommandLine() (*string, *string, *string, *string) {
+	interfaceParam := flag.String("interface", "", "Input interface (id) to listen on")
 	mqttBrokerIp := flag.String("mqtt-broker", "", "Ip of MQTT broker")
 	mqttTopic := flag.String("mqtt-topic", "/input/<interfaceParam>/", "Define topic to publish message to")
+	mqttClientId := flag.String("mqtt-client-id", "input-reader", "Client id for Mqtt connection")
 	flag.Parse()
 
-	return interfaceParam, mqttBrokerIp, mqttTopic
+	return interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId
 }
 
 func showInterfaces() {
@@ -26,12 +26,12 @@ func showInterfaces() {
 
 	for _, device := range devices {
 		id := strings.Split(device.Fn, "/")[3]
-		fmt.Println("id=", id, " ## name=", device.Name)
+		log.Println("id=", id, " ## name=", device.Name)
 	}
 }
 
 func main() {
-	interfaceParam, mqttBrokerIp, mqttTopic := setupCommandLine()
+	interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId := setupCommandLine()
 
 	if *interfaceParam == "" {
 		showInterfaces()
@@ -49,9 +49,10 @@ func main() {
 
 		rfidReader = devices[0]
 
-		mqttClient := connectToMqtt(mqttBrokerIp)
+		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
+		mqttClient.Connect()
 
-		fmt.Println("Listening on reader...")
+		log.Println("Listening on reader...")
 		rfidReader.Grab()
 
 		defer func() {
@@ -69,39 +70,17 @@ func main() {
 				digit := evdev.KEY[int(read.Code)]
 				if digit == "KEY_ENTER" {
 					tag := strings.Join(container, "")
-					fmt.Println("Tag is: ", tag)
-					sendMessage(mqttClient, strings.Replace(*mqttTopic, "<interfaceParam>", *interfaceParam, -1), tag)
+					log.Println("Tag is: ", tag)
+					msg := &mqttclient.Message{
+						Topic: strings.Replace(*mqttTopic, "<interfaceParam>", *interfaceParam, -1),
+						Value: tag,
+					}
+					mqttClient.SendMessage(msg)
 					container = make([]string, 0)
 				} else {
 					container = append(container, strings.Split(digit, "_")[1])
 				}
 			}
 		}
-	}
-}
-
-func connectToMqtt(mqttBrokerIp *string) *mqtt.Client {
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", *mqttBrokerIp, 1883))
-	opts.SetClientID("go_mqtt_client")
-	//opts.SetUsername("emqx")
-	//opts.SetPassword("public")
-
-	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		log.Println("Could not connect with broker: ", token.Error())
-		log.Println("MQTT is disabled now")
-
-		return nil
-	}
-
-	return &client
-}
-
-func sendMessage(mqttClient *mqtt.Client, mqttTopic string, tag string) {
-	if mqttClient != nil {
-		client := *mqttClient
-		token := client.Publish(mqttTopic, 2, false, tag)
-		token.Wait()
 	}
 }
