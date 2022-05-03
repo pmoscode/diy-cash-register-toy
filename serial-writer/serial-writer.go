@@ -1,54 +1,60 @@
 package main
 
 import (
-	"fmt"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/tarm/serial"
+	"flag"
+	evdev "github.com/gvalkov/golang-evdev"
+	mqttclient "github.com/pmoscode/golang-mqtt"
 	"log"
+	writer2 "serial-writer/writer"
+	"strings"
 )
 
+var debugWriter = false
+
+func setupCommandLine() (*string, *string, *string, *string, *bool) {
+	interfaceParam := flag.String("interface", "", "Output interface (id) where data is send")
+	mqttBrokerIp := flag.String("mqtt-broker", "", "Ip of MQTT broker")
+	mqttTopic := flag.String("mqtt-topic", "/output/<interfaceParam>/", "Define topic to subscribe on")
+	mqttClientId := flag.String("mqtt-client-id", "serial-writer", "Client id for Mqtt connection")
+	debug := flag.Bool("debug", false, "Check if data should be send to console for debugging")
+	flag.Parse()
+
+	return interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId, debug
+}
+
+func showInterfaces() {
+	devices, err := evdev.ListInputDevices()
+	if err != nil {
+		return
+	}
+
+	for _, device := range devices {
+		id := strings.Split(device.Fn, "/")[3]
+		log.Println("id=", id, " ## name=", device.Name)
+	}
+}
+
+func onMessageReceived(message mqttclient.Message) {
+	var writer writer2.Writer
+
+	if debugWriter {
+		writer = &writer2.Debug{}
+	} else {
+		writer = &writer2.Console{}
+	}
+
+	writer.Write(message.ToString())
+}
+
 func main() {
-	// Connect to broker
+	interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId, debug := setupCommandLine()
+	debugWriter = *debug
 
-	// setup serial
-
-	// run Sub in a loop
-	// send data to printer when topic has got data
-
-	c := &serial.Config{Name: "COM5", Baud: 115200}
-	s, err := serial.OpenPort(c)
-	if err != nil {
-		log.Fatal(err)
+	if *interfaceParam == "" {
+		showInterfaces()
+	} else {
+		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
+		mqttClient.Connect()
+		mqttClient.Subscribe(*mqttTopic, onMessageReceived)
 	}
-
-	_, err = s.Write([]byte("test"))
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func connectToMqtt(mqttBrokerIp *string) *mqtt.Client {
-	opts := mqtt.NewClientOptions()
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", *mqttBrokerIp, 1883))
-	opts.SetClientID("go_mqtt_client")
-	//opts.SetUsername("emqx")
-	//opts.SetPassword("public")
-
-	client := mqtt.NewClient(opts)
-	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		log.Println("Could not connect with broker: ", token.Error())
-		log.Println("MQTT is disabled now")
-
-		return nil
-	}
-
-	return &client
-}
-
-func sub(client *mqtt.Client) {
-	clientO := *client
-	topic := "topic/test"
-	token := clientO.Subscribe(topic, 1, nil)
-	token.Wait()
-	fmt.Printf("Subscribed to topic %s", topic)
 }
