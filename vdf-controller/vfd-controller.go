@@ -47,12 +47,16 @@ func (c Controller) digitalWrite(pin gpio.PinOut, level gpio.Level) {
 	}
 }
 
-func (c Controller) delayMicroseconds(mseconds int) {
-	time.Sleep(time.Duration(mseconds) * time.Microsecond)
+func (c Controller) delayNanoseconds(value int) {
+	time.Sleep(time.Duration(value) * time.Nanosecond)
 }
 
-func (c Controller) delayMilliseconds(mseconds int) {
-	time.Sleep(time.Duration(mseconds) * time.Millisecond)
+func (c Controller) delayMicroseconds(value int) {
+	time.Sleep(time.Duration(value) * time.Microsecond)
+}
+
+func (c Controller) delayMilliseconds(value int) {
+	time.Sleep(time.Duration(value) * time.Millisecond)
 }
 
 func (c Controller) writeCharacter(data byte, mask byte, lastDelay int) {
