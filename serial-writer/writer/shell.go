@@ -14,12 +14,8 @@ func (s Shell) Connect() {}
 func (s Shell) Disconnect() {}
 
 func (s Shell) Write(message string) {
-	cmd := exec.Command("echo", "-e", message, ">", s.InterfaceName)
-	// err := cmd.Run()
-	//if err != nil {
-	//	log.Fatalln(err)
-	//}
-	_, err := cmd.Output()
+	cmd := exec.Command("bash", "-c", "echo -e", message, ">", s.InterfaceName)
+	err := cmd.Run()
 
 	var exitCode = "0"
 	if werr, ok := err.(*exec.ExitError); ok {
@@ -27,5 +23,5 @@ func (s Shell) Write(message string) {
 			exitCode = s
 		}
 	}
-	log.Println("command executed wirth exit code ", exitCode)
+	log.Println("command executed with exit code ", exitCode)
 }
