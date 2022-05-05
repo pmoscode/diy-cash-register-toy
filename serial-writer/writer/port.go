@@ -5,13 +5,13 @@ import (
 	"log"
 )
 
-type SerialConsole struct {
+type Port struct {
 	InterfaceName     string
 	InterfaceBaudRate int
 	port              *serial.Port
 }
 
-func (c *SerialConsole) Connect() {
+func (c *Port) Connect() {
 	log.Println("Setting up Serial with interface ", c.InterfaceName, " and at baud rate ", c.InterfaceBaudRate)
 
 	config := &serial.Config{
@@ -26,11 +26,11 @@ func (c *SerialConsole) Connect() {
 	c.port = port
 }
 
-func (c *SerialConsole) Write(message string) {
+func (c *Port) Write(message string) {
 	if c.port == nil {
-		log.Fatalln("SerialConsole was not setup properly. Use 'connect' method to do this.")
+		log.Fatalln("Port was not setup properly. Use 'connect' method to do this.")
 	} else {
-		log.Println("Sending '", message, "' to SerialConsole...")
+		log.Println("Sending '", message, "' to Port...")
 		writtenBytes, err := c.port.Write([]byte(message))
 		if err != nil {
 			log.Fatal(err)
@@ -39,6 +39,6 @@ func (c *SerialConsole) Write(message string) {
 	}
 }
 
-func (c *SerialConsole) Disconnect() {
+func (c *Port) Disconnect() {
 	c.port.Close()
 }
