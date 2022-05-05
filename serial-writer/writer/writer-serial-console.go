@@ -35,6 +35,10 @@ func (c *SerialConsole) Write(message string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println("... and bytes written: ", writtenBytes)
+		err = c.port.Flush()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("... with bytes written: ", writtenBytes)
 	}
 }
