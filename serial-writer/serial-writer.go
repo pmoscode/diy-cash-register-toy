@@ -2,11 +2,9 @@ package main
 
 import (
 	"flag"
-	evdev "github.com/gvalkov/golang-evdev"
 	mqttclient "github.com/pmoscode/golang-mqtt"
 	"log"
 	writer2 "serial-writer/writer"
-	"strings"
 )
 
 var writer writer2.Writer
@@ -23,20 +21,10 @@ func setupCommandLine() (*string, *int, *string, *string, *string, *bool) {
 	return interfaceParam, interfaceBadRateParam, mqttBrokerIp, mqttTopic, mqttClientId, debug
 }
 
-func showInterfaces() {
-	devices, err := evdev.ListInputDevices()
-	if err != nil {
-		return
-	}
-
-	for _, device := range devices {
-		id := strings.Split(device.Fn, "/")[3]
-		log.Println("id=", id, " ## name=", device.Name)
-	}
-}
-
 func onMessageReceived(message mqttclient.Message) {
+	writer.Connect()
 	writer.Write(message.ToString())
+	writer.Disconnect()
 }
 
 func connectWriter(interfaceName string, interfaceBadRate int, debugWriter bool) {
@@ -49,14 +37,14 @@ func connectWriter(interfaceName string, interfaceBadRate int, debugWriter bool)
 		}
 	}
 
-	writer.Connect()
+	// writer.Connect()
 }
 
 func main() {
 	interfaceParam, interfaceBadRateParam, mqttBrokerIp, mqttTopic, mqttClientId, debug := setupCommandLine()
 
 	if *interfaceParam == "" {
-		showInterfaces()
+		log.Fatalln("'interface' parameter is required!")
 	} else {
 		connectWriter(*interfaceParam, *interfaceBadRateParam, *debug)
 
