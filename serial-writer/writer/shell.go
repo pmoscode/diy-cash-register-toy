@@ -14,7 +14,9 @@ func (s Shell) Connect() {}
 func (s Shell) Disconnect() {}
 
 func (s Shell) Write(message string) {
-	cmd := exec.Command("bash", "-c", "echo -e", message, ">", s.InterfaceName)
+	command := "echo -e \"" + message + "\" > " + s.InterfaceName
+	log.Println("Executing: ", command)
+	cmd := exec.Command("bash", "-c", command)
 	err := cmd.Run()
 
 	var exitCode = "0"
