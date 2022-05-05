@@ -12,6 +12,8 @@ type SerialConsole struct {
 }
 
 func (c *SerialConsole) Connect() {
+	log.Println("Setting up Serial with interface ", c.InterfaceName, " and at baud rate ", c.InterfaceBaudRate)
+
 	config := &serial.Config{
 		Name: c.InterfaceName,
 		Baud: c.InterfaceBaudRate,
@@ -28,6 +30,7 @@ func (c *SerialConsole) Write(message string) {
 	if c.port == nil {
 		log.Fatalln("SerialConsole was not setup properly. Use 'connect' method to do this.")
 	} else {
+		log.Println("Sending '", message, "' to SerialConsole...")
 		_, err := c.port.Write([]byte(message))
 		if err != nil {
 			log.Fatal(err)
