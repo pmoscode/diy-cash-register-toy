@@ -5,24 +5,32 @@ import (
 	"log"
 )
 
-type Console struct {
+type SerialConsole struct {
+	InterfaceName     string
+	InterfaceBaudRate int
+	port              *serial.Port
 }
 
-func (c *Console) Write(message string) {
-	// setup serial
+func (c SerialConsole) Connect() {
 	config := &serial.Config{
-		Name: "COM5",
-		Baud: 115200,
+		Name: c.InterfaceName,
+		Baud: c.InterfaceBaudRate,
 	}
-	s, err := serial.OpenPort(config)
+	port, err := serial.OpenPort(config)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = s.Write([]byte(message))
-	if err != nil {
-		log.Fatal(err)
-	}
+	c.port = port
+}
 
-	defer s.Close()
+func (c *SerialConsole) Write(message string) {
+	if c.port == nil {
+		log.Fatalln("SerialConsole was not setup properly. Use 'connect' method to do this.")
+	} else {
+		_, err := c.port.Write([]byte(message))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
