@@ -19,4 +19,6 @@ func (s Shell) Write(message string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	exitCode := cmd.ProcessState.ExitCode()
+	log.Println("command executed wirth exit code ", exitCode)
 }
