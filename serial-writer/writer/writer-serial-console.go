@@ -11,7 +11,7 @@ type SerialConsole struct {
 	port              *serial.Port
 }
 
-func (c SerialConsole) Connect() {
+func (c *SerialConsole) Connect() {
 	config := &serial.Config{
 		Name: c.InterfaceName,
 		Baud: c.InterfaceBaudRate,
