@@ -31,9 +31,10 @@ func (c *SerialConsole) Write(message string) {
 		log.Fatalln("SerialConsole was not setup properly. Use 'connect' method to do this.")
 	} else {
 		log.Println("Sending '", message, "' to SerialConsole...")
-		_, err := c.port.Write([]byte(message))
+		writtenBytes, err := c.port.Write([]byte(message))
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Println("... and bytes written: ", writtenBytes)
 	}
 }
