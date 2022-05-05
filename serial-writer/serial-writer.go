@@ -31,10 +31,13 @@ func connectWriter(interfaceName string, interfaceBadRate int, debugWriter bool)
 	if debugWriter {
 		writer = &writer2.Debug{}
 	} else {
-		writer = &writer2.SerialConsole{
-			InterfaceName:     interfaceName,
-			InterfaceBaudRate: interfaceBadRate,
+		writer = &writer2.Shell{
+			InterfaceName: interfaceName,
 		}
+		//writer = &writer2.SerialConsole{
+		//	InterfaceName:     interfaceName,
+		//	InterfaceBaudRate: interfaceBadRate,
+		//}
 	}
 
 	// writer.Connect()
