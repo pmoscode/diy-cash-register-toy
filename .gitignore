@@ -2,3 +2,7 @@
 input-reader/input-reader
 serial-writer/serial-writer
 vdf-controller/vdf-controller
+item-store/item-store
+item-store/products.yaml.inserted
+item-store/products.yaml
+item-store/data
