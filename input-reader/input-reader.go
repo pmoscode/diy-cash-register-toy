@@ -30,6 +30,10 @@ func showInterfaces() {
 	}
 }
 
+func cleanTag(tag string) string {
+	return strings.Replace(tag, "SLASH", "-", -1)
+}
+
 func main() {
 	interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId := setupCommandLine()
 
@@ -69,7 +73,7 @@ func main() {
 			if read.Type == evdev.EV_KEY && read.Value == 1 {
 				digit := evdev.KEY[int(read.Code)]
 				if digit == "KEY_ENTER" {
-					tag := strings.Join(container, "")
+					tag := cleanTag(strings.Join(container, ""))
 					log.Println("Tag is: ", tag)
 					msg := &mqttclient.Message{
 						Topic: strings.Replace(*mqttTopic, "<interfaceParam>", *interfaceParam, -1),
