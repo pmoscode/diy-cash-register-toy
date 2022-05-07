@@ -1,0 +1,7 @@
+items:
+  - name: Name of product
+    code: Bar code
+    value: Price as float
+  - name: Name of product 2
+    code: Bar code 2
+    value: Price as float 2
