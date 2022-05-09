@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	mqttclient "github.com/pmoscode/golang-mqtt/mqtt"
+	log "gitlab.com/pmoscode/golang-shared-libs/logging"
+	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
 	"item-store/product"
 )
 
@@ -11,6 +11,8 @@ var productsFilename = "products.yaml"
 var mqttTopicPublish string
 var productList *product.List
 var mqttClient *mqttclient.Client
+
+var logger *log.Logger
 
 func setupCommandLine() (*string, *string, *string, *string) {
 	mqttBrokerIp := flag.String("mqtt-broker", "localhost", "Ip of MQTT broker")
@@ -42,12 +44,13 @@ func onMessage(message mqttclient.Message) {
 }
 
 func main() {
+	logger = log.NewLogger("item-store.log")
 	mqttBrokerIp, mqttClientId, mqttTopicSub, mqttTopicPub := setupCommandLine()
 	mqttTopicPublish = *mqttTopicPub
 
 	list, err := product.NewProductList(productsFilename)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 	}
 
 	productList = list

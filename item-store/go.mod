@@ -2,10 +2,10 @@ module item-store
 
 go 1.18
 
-replace github.com/pmoscode/golang-mqtt => ./../shared-libs
+replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
 require (
-	github.com/pmoscode/golang-mqtt v0.0.0-00010101000000-000000000000
+	gitlab.com/pmoscode/golang-shared-libs v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
