@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	mqttclient "github.com/pmoscode/golang-mqtt"
+	mqttclient "github.com/pmoscode/golang-mqtt/mqtt"
 	"log"
 	writer2 "serial-writer/writer"
 )

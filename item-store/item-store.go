@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	mqttclient "github.com/pmoscode/golang-mqtt"
+	mqttclient "github.com/pmoscode/golang-mqtt/mqtt"
 	"item-store/product"
 )
 

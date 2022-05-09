@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	evdev "github.com/gvalkov/golang-evdev"
-	mqttclient "github.com/pmoscode/golang-mqtt"
+	mqttclient "github.com/pmoscode/golang-mqtt/mqtt"
 	"log"
 	"strings"
 )
