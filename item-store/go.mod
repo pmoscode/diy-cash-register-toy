@@ -2,7 +2,7 @@ module item-store
 
 go 1.18
 
-replace github.com/pmoscode/golang-mqtt => ../mqtt-client
+replace github.com/pmoscode/golang-mqtt => ./../shared-libs
 
 require (
 	github.com/pmoscode/golang-mqtt v0.0.0-00010101000000-000000000000

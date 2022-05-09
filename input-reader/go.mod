@@ -2,7 +2,7 @@ module input-reader
 
 go 1.18
 
-replace github.com/pmoscode/golang-mqtt => ../mqtt-client
+replace github.com/pmoscode/golang-mqtt => ./../shared-libs
 
 require (
 	github.com/gvalkov/golang-evdev v0.0.0-20191114124502-287e62b94bcb
