@@ -3,10 +3,12 @@ package main
 import (
 	"flag"
 	evdev "github.com/gvalkov/golang-evdev"
-	mqttclient "github.com/pmoscode/golang-mqtt/mqtt"
-	"log"
+	log "gitlab.com/pmoscode/golang-shared-libs/logging"
+	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
 	"strings"
 )
+
+var logger *log.Logger
 
 func setupCommandLine() (*string, *string, *string, *string) {
 	interfaceParam := flag.String("interface", "", "Input interface (id) to listen on")
@@ -26,7 +28,7 @@ func showInterfaces() {
 
 	for _, device := range devices {
 		id := strings.Split(device.Fn, "/")[3]
-		log.Println("id=", id, " ## name=", device.Name)
+		logger.Println("id=", id, " ## name=", device.Name)
 	}
 }
 
@@ -35,6 +37,7 @@ func cleanTag(tag string) string {
 }
 
 func main() {
+	logger = log.NewLogger("input-reader.log")
 	interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId := setupCommandLine()
 
 	if *interfaceParam == "" {
@@ -44,11 +47,11 @@ func main() {
 
 		devices, err := evdev.ListInputDevices("/dev/input/" + *interfaceParam)
 		if err != nil {
-			log.Fatalln(err)
+			logger.Fatalln(err)
 		}
 
 		if len(devices) == 0 {
-			log.Fatalln("No devices found with name: ", *interfaceParam)
+			logger.Fatalln("No devices found with name: ", *interfaceParam)
 		}
 
 		rfidReader = devices[0]
@@ -56,7 +59,7 @@ func main() {
 		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
 		mqttClient.Connect()
 
-		log.Println("Listening on reader...")
+		logger.Println("Listening on reader...")
 		rfidReader.Grab()
 
 		defer func() {
@@ -74,7 +77,7 @@ func main() {
 				digit := evdev.KEY[int(read.Code)]
 				if digit == "KEY_ENTER" {
 					tag := cleanTag(strings.Join(container, ""))
-					log.Println("Tag is: ", tag)
+					logger.Println("Tag is: ", tag)
 					msg := &mqttclient.Message{
 						Topic: strings.Replace(*mqttTopic, "<interfaceParam>", *interfaceParam, -1),
 						Value: tag,

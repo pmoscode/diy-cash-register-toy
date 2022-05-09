@@ -2,15 +2,13 @@ module input-reader
 
 go 1.18
 
-replace github.com/pmoscode/golang-mqtt => ./../shared-libs
+replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
-require (
-	github.com/gvalkov/golang-evdev v0.0.0-20191114124502-287e62b94bcb
-	github.com/pmoscode/golang-mqtt v0.0.0-00010101000000-000000000000
-)
+require github.com/gvalkov/golang-evdev v0.0.0-20191114124502-287e62b94bcb
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	gitlab.com/pmoscode/golang-shared-libs v0.0.0-00010101000000-000000000000
 	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0 // indirect
 )
