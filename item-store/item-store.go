@@ -1,90 +1,59 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"github.com/256dpi/lungo"
-	"go.mongodb.org/mongo-driver/bson"
-	"gopkg.in/yaml.v3"
-	"log"
-	"os"
+	mqttclient "github.com/pmoscode/golang-mqtt"
+	"item-store/product"
 )
 
-type Item struct {
-	Code  string  `yaml:"code"`
-	Name  string  `yaml:"name"`
-	Value float32 `yaml:"value"`
-}
-
-type Products struct {
-	Items []Item `yaml:"items"`
-}
-
 var productsFilename = "products.yaml"
+var mqttTopicPublish string
+var productList *product.List
+var mqttClient *mqttclient.Client
+
+func setupCommandLine() (*string, *string, *string, *string) {
+	mqttBrokerIp := flag.String("mqtt-broker", "localhost", "Ip of MQTT broker")
+	mqttClientId := flag.String("mqtt-client-id", "item-store", "Client id for Mqtt connection")
+	mqttTopicSub := flag.String("mqtt-topic-sub", "/input/item/", "Define topic to subscribe resolver requests to")
+	mqttTopicPub := flag.String("mqtt-topic-pub", "/output/item/", "Define topic to publish resolved requests to")
+	flag.Parse()
+
+	return mqttBrokerIp, mqttClientId, mqttTopicSub, mqttTopicPub
+}
+
+func onMessage(message mqttclient.Message) {
+	code := message.ToString()
+
+	productItem := productList.FromCode(code)
+	if productItem != nil {
+		mqttMessage := mqttclient.Message{
+			Topic: mqttTopicPublish,
+			Value: productItem,
+		}
+		mqttClient.SendMessage(&mqttMessage)
+	} else {
+		mqttMessage := mqttclient.Message{
+			Topic: mqttTopicPublish,
+			Value: "not found",
+		}
+		mqttClient.SendMessage(&mqttMessage)
+	}
+}
 
 func main() {
-	var products *Products
+	mqttBrokerIp, mqttClientId, mqttTopicSub, mqttTopicPub := setupCommandLine()
+	mqttTopicPublish = *mqttTopicPub
 
-	_, error := os.Stat(productsFilename)
-
-	if !os.IsNotExist(error) {
-		file, err := os.Open(productsFilename)
-		if err != nil {
-			log.Println(err.Error())
-		}
-		defer file.Close()
-
-		decoder := yaml.NewDecoder(file)
-		if err := decoder.Decode(products); err != nil {
-			log.Println(err.Error())
-		}
-
-		fmt.Println(products)
-		fmt.Println("First item: ", products.Items[0].Name)
-		fmt.Println("Second item: ", products.Items[1].Name)
-	}
-
-	// prepare options
-	opts := lungo.Options{
-		Store: lungo.NewFileStore("data/products.db", os.ModePerm),
-	}
-
-	// open database
-	client, engine, err := lungo.Open(nil, opts)
+	list, err := product.NewProductList(productsFilename)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
-	defer engine.Close()
+	productList = list
 
-	foo := client.Database("products")
+	mqttClient = mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
+	mqttClient.Connect()
 
-	bar := foo.Collection("items")
-
-	if products != nil {
-		for _, item := range products.Items {
-			_, err = bar.InsertOne(nil, &item)
-			if err != nil {
-				panic(err)
-			}
-		}
-	}
-
-	csr, err := bar.Find(nil, bson.D{})
-	if err != nil {
-		panic(err)
-	}
-
-	var items []Item
-	err = csr.All(nil, &items)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("%+v", items)
-	fmt.Println()
-
-	err = os.Rename(productsFilename, productsFilename+".inserted")
-	if err != nil {
-		return
-	}
+	mqttClient.Subscribe(*mqttTopicSub, onMessage)
 }
