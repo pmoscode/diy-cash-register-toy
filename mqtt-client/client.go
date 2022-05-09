@@ -28,7 +28,7 @@ func (m Message) ToString() string {
 	return string(m.Value.([]uint8))
 }
 
-type client struct {
+type Client struct {
 	brokerIp string
 	port     int
 	topic    string
@@ -36,7 +36,7 @@ type client struct {
 	client   *mqtt.Client
 }
 
-func (c *client) Connect() error {
+func (c *Client) Connect() error {
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", c.brokerIp, c.port))
 	opts.SetClientID(c.clientId)
@@ -54,14 +54,14 @@ func (c *client) Connect() error {
 	return nil
 }
 
-func (c *client) Disconnect() {
+func (c *Client) Disconnect() {
 	client := *c.client
 	client.Disconnect(100)
 }
 
-func (c *client) SendMessage(message *Message) {
+func (c *Client) SendMessage(message *Message) {
 	if c.client == nil {
-		log.Println("Mqtt client not connected! Call 'connect' method...")
+		log.Println("Mqtt Client not connected! Call 'connect' method...")
 	} else {
 		client := *c.client
 		token := client.Publish(message.Topic, 2, false, message.ToJson())
@@ -69,9 +69,9 @@ func (c *client) SendMessage(message *Message) {
 	}
 }
 
-func (c *client) Subscribe(topic string, fn func(message Message)) {
+func (c *Client) Subscribe(topic string, fn func(message Message)) {
 	if c.client == nil {
-		log.Println("Mqtt client not connected! Call 'connect' method...")
+		log.Println("Mqtt Client not connected! Call 'connect' method...")
 	} else {
 		client := *c.client
 		client.Subscribe(topic, 2, func(client mqtt.Client, msg mqtt.Message) {
@@ -97,8 +97,8 @@ func (c *client) Subscribe(topic string, fn func(message Message)) {
 	}
 }
 
-func CreateClient(brokerIp string, port int, clientId string) *client {
-	return &client{
+func CreateClient(brokerIp string, port int, clientId string) *Client {
+	return &Client{
 		brokerIp: brokerIp,
 		port:     port,
 		clientId: clientId,
