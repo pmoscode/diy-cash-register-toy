@@ -1,8 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	log "gitlab.com/pmoscode/golang-shared-libs/logging"
 	"periph.io/x/conn/v3/gpio"
 	"periph.io/x/conn/v3/gpio/gpioreg"
 	"periph.io/x/host/v3"
@@ -12,9 +11,13 @@ import (
 var pinNumber = "18"
 var sleepSeconds = 2
 
+var logger *log.Logger
+
 func main() {
+	logger = log.NewLogger("log.log")
+
 	if _, err := host.Init(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	pin := gpioreg.ByName("P1_" + pinNumber)
@@ -24,13 +27,13 @@ func main() {
 		if high {
 			err := pin.Out(gpio.High)
 			if err != nil {
-				fmt.Print("Error: ", err)
+				logger.Print("Error: ", err)
 				return
 			}
 		} else {
 			err := pin.Out(gpio.Low)
 			if err != nil {
-				fmt.Print("Error: ", err)
+				logger.Print("Error: ", err)
 				return
 			}
 		}
