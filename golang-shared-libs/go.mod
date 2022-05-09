@@ -1,4 +1,4 @@
-module github.com/pmoscode/golang-mqtt
+module gitlab.com/pmoscode/golang-shared-libs
 
 go 1.18
 
