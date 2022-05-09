@@ -2,12 +2,13 @@ package main
 
 import (
 	"flag"
-	mqttclient "github.com/pmoscode/golang-mqtt/mqtt"
-	"log"
+	log "gitlab.com/pmoscode/golang-shared-libs/logging"
+	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
 	writer2 "serial-writer/writer"
 )
 
 var writer writer2.Writer
+var logger *log.Logger
 
 func setupCommandLine() (*string, *int, *string, *string, *string, *string, *bool) {
 	interfaceParam := flag.String("interface", "", "Output interface (id) where data is send")
@@ -41,7 +42,7 @@ func connectWriter(interfaceName string, interfaceBadRate int, writerImpl string
 				InterfaceBaudRate: interfaceBadRate,
 			}
 		default:
-			log.Fatalln("Unknown writer implementation: ", writerImpl)
+			logger.Fatalln("Unknown writer implementation: ", writerImpl)
 		}
 	}
 
@@ -49,10 +50,11 @@ func connectWriter(interfaceName string, interfaceBadRate int, writerImpl string
 }
 
 func main() {
+	logger = log.NewLogger("serial-writer.log")
 	interfaceParam, interfaceBadRateParam, writerParam, mqttBrokerIp, mqttTopic, mqttClientId, debug := setupCommandLine()
 
 	if *interfaceParam == "" {
-		log.Fatalln("'interface' parameter is required!")
+		logger.Fatalln("'interface' parameter is required!")
 	} else {
 		connectWriter(*interfaceParam, *interfaceBadRateParam, *writerParam, *debug)
 
