@@ -14,6 +14,7 @@ func (s Shell) Connect() {}
 func (s Shell) Disconnect() {}
 
 func (s Shell) Write(message string) {
+	// TODO Set baud rate for shell
 	command := "echo -e \"" + message + "\" > " + s.InterfaceName
 	log.Println("Executing: ", command)
 	cmd := exec.Command("bash", "-c", command)

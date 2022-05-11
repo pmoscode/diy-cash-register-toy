@@ -4,6 +4,7 @@ import (
 	"flag"
 	log "gitlab.com/pmoscode/golang-shared-libs/logging"
 	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
+	"gitlab.com/pmoscode/golang-shared-libs/utils"
 	writer2 "serial-writer/writer"
 )
 
@@ -56,6 +57,10 @@ func main() {
 	if *interfaceParam == "" {
 		logger.Fatalln("'interface' parameter is required!")
 	} else {
+		isPi := utils.IsRaspberryPiHardware()
+		if !isPi {
+			*debug = true
+		}
 		connectWriter(*interfaceParam, *interfaceBadRateParam, *writerParam, *debug)
 
 		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
