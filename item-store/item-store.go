@@ -59,4 +59,5 @@ func main() {
 	mqttClient.Connect()
 
 	mqttClient.Subscribe(*mqttTopicSub, onMessage)
+	mqttClient.LoopForever()
 }
