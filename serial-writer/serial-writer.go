@@ -66,5 +66,6 @@ func main() {
 		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
 		mqttClient.Connect()
 		mqttClient.Subscribe(*mqttTopic, onMessageReceived)
+		mqttClient.LoopForever()
 	}
 }
