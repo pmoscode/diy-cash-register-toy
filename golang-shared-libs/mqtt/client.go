@@ -16,6 +16,8 @@ type Message struct {
 	Value interface{}
 }
 
+const notConnected = "Mqtt Client not connected! Call 'connect' method..."
+
 func (m Message) ToJson() string {
 	marshal, err := json.Marshal(m.Value)
 	if err != nil {
@@ -61,7 +63,7 @@ func (c *Client) Disconnect() {
 
 func (c *Client) SendMessage(message *Message) {
 	if c.client == nil {
-		log.Println("Mqtt Client not connected! Call 'connect' method...")
+		log.Println(notConnected)
 	} else {
 		client := *c.client
 		token := client.Publish(message.Topic, 2, false, message.ToJson())
@@ -71,7 +73,7 @@ func (c *Client) SendMessage(message *Message) {
 
 func (c *Client) Subscribe(topic string, fn func(message Message)) {
 	if c.client == nil {
-		log.Println("Mqtt Client not connected! Call 'connect' method...")
+		log.Println(notConnected)
 	} else {
 		client := *c.client
 		client.Subscribe(topic, 2, func(client mqtt.Client, msg mqtt.Message) {
@@ -81,7 +83,13 @@ func (c *Client) Subscribe(topic string, fn func(message Message)) {
 			}
 			fn(message)
 		})
+	}
+}
 
+func (c *Client) LoopForever() {
+	if c.client == nil {
+		log.Println(notConnected)
+	} else {
 		channel := make(chan os.Signal)
 		signal.Notify(channel, os.Interrupt, syscall.SIGTERM)
 		go func() {
