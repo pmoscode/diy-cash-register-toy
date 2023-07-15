@@ -10,5 +10,5 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	gitlab.com/pmoscode/golang-shared-libs v0.0.0-00010101000000-000000000000
-	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0 // indirect
+	golang.org/x/net v0.7.0 // indirect
 )
