@@ -4,7 +4,7 @@ go 1.18
 
 replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
-require github.com/gvalkov/golang-evdev v0.0.0-20191114124502-287e62b94bcb
+require github.com/gvalkov/golang-evdev v0.0.0-20220815104727-7e27d6ce89b6
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
