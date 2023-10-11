@@ -10,8 +10,9 @@ require (
 )
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	github.com/eclipse/paho.mqtt.golang v1.4.3 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
 )
