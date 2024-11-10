@@ -6,7 +6,7 @@ tasks:
   upgrade:
     desc: Update all go dependencies
     cmds:
-      #- cd golang-shared-libs && go get -u */**
+      - cd golang-shared-libs && go get -u ./...
       - cd input-reader && go get -u
       - cd item-store && go get -u
       - cd serial-writer && go get -u
