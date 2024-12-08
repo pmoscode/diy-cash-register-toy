@@ -2,7 +2,7 @@ module test-gpio
 
 go 1.22
 
-toolchain go1.23.3
+toolchain go1.23.4
 
 replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
