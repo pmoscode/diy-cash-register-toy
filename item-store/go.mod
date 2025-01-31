@@ -1,6 +1,6 @@
 module item-store
 
-go 1.18
+go 1.23.5
 
 replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
