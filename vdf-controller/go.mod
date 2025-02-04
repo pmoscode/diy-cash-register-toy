@@ -2,7 +2,7 @@ module vdf-controller
 
 go 1.23.5
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	periph.io/x/conn/v3 v3.7.1
