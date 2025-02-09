@@ -6,7 +6,7 @@ replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
 require github.com/gvalkov/golang-evdev v0.0.0-20220815104727-7e27d6ce89b6
 
-require golang.org/x/sync v0.10.0 // indirect
+require golang.org/x/sync v0.11.0 // indirect
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.5.0 // indirect
