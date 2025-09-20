@@ -1,6 +1,6 @@
 module test-gpio
 
-go 1.23.5
+go 1.25.0
 
 replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 

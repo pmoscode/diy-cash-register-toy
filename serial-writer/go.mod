@@ -1,6 +1,6 @@
 module serial-writer
 
-go 1.23.5
+go 1.25.0
 
 replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
 
@@ -10,9 +10,9 @@ require (
 )
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.5.0 // indirect
+	github.com/eclipse/paho.mqtt.golang v1.5.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
-	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/net v0.44.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
 )
