@@ -1,8 +1,8 @@
 module vdf-controller
 
-go 1.23.5
+go 1.26.2
 
 require (
-	periph.io/x/conn/v3 v3.7.2
+	periph.io/x/conn/v3 v3.7.3
 	periph.io/x/host/v3 v3.8.5
 )
