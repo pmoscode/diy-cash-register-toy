@@ -1,4 +1,9 @@
-package utils
+// Package hardware provides helper functions to detect the runtime hardware.
+//
+// This used to live in the shared "golang-shared-libs/utils" package, but
+// there is no equivalent in "github.com/pmoscode/go-common", so it has been
+// vendored locally here.
+package hardware
 
 import (
 	"fmt"
@@ -7,8 +12,6 @@ import (
 )
 
 func checkCommand(command string, params []string, validate string) bool {
-	isRaspi := true
-
 	path, _ := exec.LookPath(command)
 	cmd := exec.Command(path, params...)
 	fmt.Println(cmd.String())
@@ -16,16 +19,13 @@ func checkCommand(command string, params []string, validate string) bool {
 	fmt.Println(string(output))
 
 	if err != nil {
-		isRaspi = false
-	} else {
-		if !strings.Contains(string(output), validate) {
-			isRaspi = false
-		}
+		return false
 	}
 
-	return isRaspi
+	return strings.Contains(string(output), validate)
 }
 
+// IsRaspberryPiHardware tries to detect if the current process runs on a Raspberry Pi.
 func IsRaspberryPiHardware() bool {
 	// Test for "Hardware" content in /proc/cpuinfo
 	foundSoC := checkCommand("grep", strings.Fields("Hardware /proc/cpuinfo"), "BCM2835")

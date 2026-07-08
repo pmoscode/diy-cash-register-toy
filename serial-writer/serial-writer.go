@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
-	log "gitlab.com/pmoscode/golang-shared-libs/logging"
-	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
-	"gitlab.com/pmoscode/golang-shared-libs/utils"
+
+	log "github.com/pmoscode/go-common/logging"
+	mqttclient "github.com/pmoscode/go-common/mqtt"
+	"serial-writer/hardware"
 	writer2 "serial-writer/writer"
 )
 
@@ -25,7 +26,7 @@ func setupCommandLine() (*string, *int, *string, *string, *string, *string, *boo
 }
 
 func onMessageReceived(message mqttclient.Message) {
-	writer.Write(message.ToString())
+	writer.Write(message.ToRawString())
 }
 
 func connectWriter(interfaceName string, interfaceBadRate int, writerImpl string, debugWriter bool) {
@@ -43,7 +44,7 @@ func connectWriter(interfaceName string, interfaceBadRate int, writerImpl string
 				InterfaceBaudRate: interfaceBadRate,
 			}
 		default:
-			logger.Fatalln("Unknown writer implementation: ", writerImpl)
+			logger.Fatal(nil, "Unknown writer implementation: %s", writerImpl)
 		}
 	}
 
@@ -51,20 +52,22 @@ func connectWriter(interfaceName string, interfaceBadRate int, writerImpl string
 }
 
 func main() {
-	logger = log.NewLogger("serial-writer.log")
+	logger = log.NewLogger()
 	interfaceParam, interfaceBadRateParam, writerParam, mqttBrokerIp, mqttTopic, mqttClientId, debug := setupCommandLine()
 
 	if *interfaceParam == "" {
-		logger.Fatalln("'interface' parameter is required!")
+		logger.Fatal(nil, "'interface' parameter is required!")
 	} else {
-		isPi := utils.IsRaspberryPiHardware()
+		isPi := hardware.IsRaspberryPiHardware()
 		if !isPi {
 			*debug = true
 		}
 		connectWriter(*interfaceParam, *interfaceBadRateParam, *writerParam, *debug)
 
-		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
-		mqttClient.Connect()
+		mqttClient := mqttclient.NewClient(mqttclient.WithBroker(*mqttBrokerIp, 1883), mqttclient.WithClientId(*mqttClientId))
+		if err := mqttClient.Connect(); err != nil {
+			logger.Fatal(err, "Could not connect to mqtt broker")
+		}
 		mqttClient.Subscribe(*mqttTopic, onMessageReceived)
 		mqttClient.LoopForever()
 	}

@@ -2,10 +2,11 @@ package main
 
 import (
 	"flag"
-	evdev "github.com/gvalkov/golang-evdev"
-	log "gitlab.com/pmoscode/golang-shared-libs/logging"
-	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
 	"strings"
+
+	evdev "github.com/gvalkov/golang-evdev"
+	log "github.com/pmoscode/go-common/logging"
+	mqttclient "github.com/pmoscode/go-common/mqtt"
 )
 
 var logger *log.Logger
@@ -28,7 +29,7 @@ func showInterfaces() {
 
 	for _, device := range devices {
 		id := strings.Split(device.Fn, "/")[3]
-		logger.Println("id=", id, " ## name=", device.Name)
+		logger.Info("id=%s ## name=%s", id, device.Name)
 	}
 }
 
@@ -37,7 +38,7 @@ func cleanTag(tag string) string {
 }
 
 func main() {
-	logger = log.NewLogger("input-reader.log")
+	logger = log.NewLogger()
 	interfaceParam, mqttBrokerIp, mqttTopic, mqttClientId := setupCommandLine()
 
 	if *interfaceParam == "" {
@@ -47,19 +48,21 @@ func main() {
 
 		devices, err := evdev.ListInputDevices("/dev/input/" + *interfaceParam)
 		if err != nil {
-			logger.Fatalln(err)
+			logger.Fatal(err, "Could not list input devices")
 		}
 
 		if len(devices) == 0 {
-			logger.Fatalln("No devices found with name: ", *interfaceParam)
+			logger.Fatal(nil, "No devices found with name: %s", *interfaceParam)
 		}
 
 		rfidReader = devices[0]
 
-		mqttClient := mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
-		mqttClient.Connect()
+		mqttClient := mqttclient.NewClient(mqttclient.WithBroker(*mqttBrokerIp, 1883), mqttclient.WithClientId(*mqttClientId))
+		if err := mqttClient.Connect(); err != nil {
+			logger.Fatal(err, "Could not connect to mqtt broker")
+		}
 
-		logger.Println("Listening on reader...")
+		logger.Info("Listening on reader...")
 		rfidReader.Grab()
 
 		defer func() {
@@ -77,12 +80,12 @@ func main() {
 				digit := evdev.KEY[int(read.Code)]
 				if digit == "KEY_ENTER" {
 					tag := cleanTag(strings.Join(container, ""))
-					logger.Println("Tag is: ", tag)
+					logger.Info("Tag is: %s", tag)
 					msg := &mqttclient.Message{
 						Topic: strings.Replace(*mqttTopic, "<interfaceParam>", *interfaceParam, -1),
 						Value: tag,
 					}
-					mqttClient.SendMessage(msg)
+					mqttClient.Publish(msg)
 					container = make([]string, 0)
 				} else {
 					container = append(container, strings.Split(digit, "_")[1])

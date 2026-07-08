@@ -2,11 +2,9 @@ module serial-writer
 
 go 1.26.5
 
-replace gitlab.com/pmoscode/golang-shared-libs => ../golang-shared-libs
-
 require (
+	github.com/pmoscode/go-common v0.10.0
 	github.com/tarm/serial v0.0.0-20180830185346-98f6abe2eb07
-	gitlab.com/pmoscode/golang-shared-libs v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -15,4 +13,5 @@ require (
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	log "gitlab.com/pmoscode/golang-shared-libs/logging"
-	mqttclient "gitlab.com/pmoscode/golang-shared-libs/mqtt"
+
+	log "github.com/pmoscode/go-common/logging"
+	mqttclient "github.com/pmoscode/go-common/mqtt"
 	"item-store/product"
 )
 
@@ -25,7 +26,7 @@ func setupCommandLine() (*string, *string, *string, *string) {
 }
 
 func onMessage(message mqttclient.Message) {
-	code := message.ToString()
+	code := message.ToRawString()
 
 	productItem := productList.FromCode(code)
 	if productItem != nil {
@@ -33,30 +34,32 @@ func onMessage(message mqttclient.Message) {
 			Topic: mqttTopicPublish,
 			Value: productItem,
 		}
-		mqttClient.SendMessage(&mqttMessage)
+		mqttClient.Publish(&mqttMessage)
 	} else {
 		mqttMessage := mqttclient.Message{
 			Topic: mqttTopicPublish,
 			Value: "not found",
 		}
-		mqttClient.SendMessage(&mqttMessage)
+		mqttClient.Publish(&mqttMessage)
 	}
 }
 
 func main() {
-	logger = log.NewLogger("item-store.log")
+	logger = log.NewLogger()
 	mqttBrokerIp, mqttClientId, mqttTopicSub, mqttTopicPub := setupCommandLine()
 	mqttTopicPublish = *mqttTopicPub
 
 	list, err := product.NewProductList(productsFilename)
 	if err != nil {
-		logger.Println(err)
+		logger.Error(err, "Could not load product list")
 	}
 
 	productList = list
 
-	mqttClient = mqttclient.CreateClient(*mqttBrokerIp, 1883, *mqttClientId)
-	mqttClient.Connect()
+	mqttClient = mqttclient.NewClient(mqttclient.WithBroker(*mqttBrokerIp, 1883), mqttclient.WithClientId(*mqttClientId))
+	if err := mqttClient.Connect(); err != nil {
+		logger.Fatal(err, "Could not connect to mqtt broker")
+	}
 
 	mqttClient.Subscribe(*mqttTopicSub, onMessage)
 	mqttClient.LoopForever()
